@@ -4,6 +4,9 @@ setlocal
 
 set "THIS=%~dp0"
 if "%THIS:~-1%"=="\" set "THIS=%THIS:~0,-1%"
+rem -- Defaults (edit if needed) ---------------------------------
+set "AI_MODE=ai"
+set "AI_MODEL=Adobe Firefly"
 rem -- Where is dreamstime-embed.ps1? -----------------------------
 rem 1) Same folder as this file (default - keep them together)
 rem 2) Edit INSTALL_DIR below if you move the .ps1 elsewhere
@@ -54,7 +57,7 @@ echo This will NOT edit your original images.
 echo It will create/copy files into a NEW Dreamstime Ready folder every time.
 echo.
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT%" -Csv "%CSV%" -ImagesDir "%THIS%" -OutDir "%OUT%" -AiMode "ai" -AiModel "Adobe Firefly"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT%" -Csv "%CSV%" -ImagesDir "%THIS%" -OutDir "%OUT%" -AiMode "%AI_MODE%" -AiModel "%AI_MODEL%"
 
 echo.
 if errorlevel 1 (
