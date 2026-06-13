@@ -94,6 +94,13 @@ select:focus{outline:none;border-color:var(--ac);}
 select option{background:var(--sf2);}
 
 .plat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;}
+.plat-group-hd{font-family:'Space Grotesk',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:var(--txm);margin:8px 0 4px;display:flex;align-items:center;gap:5px;}
+.plat-group-hd.tested{color:var(--ok);}
+.plat-group-hd.untested{color:var(--wa);}
+.plat-it.untested{opacity:.55;}
+.plat-it.untested.on{opacity:1;}
+.plat-it.untested .plat-ic::after{content:'🧪';position:absolute;top:-4px;right:-4px;font-size:8px;}
+.plat-it{position:relative;}
 .plat-it{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);cursor:pointer;transition:all .15s;}
 .plat-it:hover{border-color:var(--bd2);}
 .plat-it.on{border-color:var(--ac);background:var(--acd);}
@@ -1360,13 +1367,27 @@ function escHTML(s){
 
 function initPlats() {
   const g=document.getElementById('platGrid');
-  PLATS.forEach(p=>{
-    const d=document.createElement('div');
-    d.className='plat-it'+(activePlats.has(p.id)?' on':'');
-    d.id='pl-'+p.id;
-    d.onclick=()=>togPlat(p.id,d);
-    d.innerHTML=`<div class="plat-ic" style="background:${p.bg}22;color:${p.bg};">${p.ic}</div><div class="plat-nm">${p.nm}</div>`;
-    g.appendChild(d);
+  g.innerHTML='';
+  const groups=[
+    {tier:'verified', label:'✓ Tested & verified', cls:'tested'},
+    {tier:'untested', label:'🧪 Not yet tested', cls:'untested'},
+  ];
+  groups.forEach(grp=>{
+    const items=PLATS.filter(p=>p.tier===grp.tier);
+    if(!items.length)return;
+    const hd=document.createElement('div');
+    hd.className='plat-group-hd '+grp.cls;
+    hd.textContent=grp.label;
+    hd.style.gridColumn='1 / -1';
+    g.appendChild(hd);
+    items.forEach(p=>{
+      const d=document.createElement('div');
+      d.className='plat-it'+(p.tier==='untested'?' untested':'')+(activePlats.has(p.id)?' on':'');
+      d.id='pl-'+p.id;
+      d.onclick=()=>togPlat(p.id,d);
+      d.innerHTML=`<div class="plat-ic" style="background:${p.bg}22;color:${p.bg};">${p.ic}</div><div class="plat-nm">${p.nm}</div>`;
+      g.appendChild(d);
+    });
   });
 }
 
