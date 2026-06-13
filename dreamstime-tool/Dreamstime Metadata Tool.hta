@@ -337,12 +337,16 @@ function runEmbed(){
   setRunStatus("Working. Please wait...", false);
   writeSettings();
 
+  var progFile = tempBase("dreamstime-progress") + ".txt";
+  window._progFile = progFile;
+
   var cmd = "powershell -NoProfile -ExecutionPolicy Bypass -File " + q(SCRIPT_PATH) +
     " -Csv " + q(currentCsv) +
     " -ImagesDir " + q(currentFolder) +
     " -OutDir " + q(lastOutputFolder) +
     " -AiMode " + q(mode) +
-    " -AiModel " + q(model);
+    " -AiModel " + q(model) +
+    " -ProgressFile " + q(progFile);
 
   try{
     var exec = shell.Exec(cmd);
@@ -356,6 +360,20 @@ function runEmbed(){
 
 function poll(exec){
   if(exec.Status === 0){
+    try{
+      if(window._progFile && fso.FileExists(window._progFile)){
+        var pf = fso.OpenTextFile(window._progFile, 1, false, -1);
+        var line = pf.ReadAll(); pf.Close();
+        var parts = String(line||"").split("|");
+        if(parts.length>=3){
+          if(parts[3]==="complete" || parts[1]===parts[0]){
+            setRunStatus("Finishing up...", false);
+          } else {
+            setRunStatus("Embedding image " + parts[0] + " of " + parts[1] + " — " + parts[2], false);
+          }
+        }
+      }
+    }catch(e){}
     window.setTimeout(function(){ poll(exec); }, 700);
     return;
   }
@@ -366,6 +384,7 @@ function poll(exec){
   try{ err = exec.StdErr.ReadAll(); }catch(e2){}
 
   $("log").value = (out || "") + (err ? "\r\nERROR:\r\n" + err : "");
+  try{ if(window._progFile && fso.FileExists(window._progFile)) fso.DeleteFile(window._progFile, true); }catch(e){}
   running = false;
   $("runBtn").disabled = false;
 
