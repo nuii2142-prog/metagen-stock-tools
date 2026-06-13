@@ -2383,6 +2383,7 @@ function validateExport(fmtId,cfg=getExportConfig()){
   const sp=PLAT_SPECS[fmtId];
   if(!sp)return [];
   const warnings=[];
+  if(isUntested(fmtId)) warnings.push(`${sp.name}: format not yet verified against a real upload — double-check before submitting`);
   results.forEach(r=>{
     const tLen=r.title?r.title.length:0;
     const exportKeywords=getExportKeywords(sp,r,cfg);
