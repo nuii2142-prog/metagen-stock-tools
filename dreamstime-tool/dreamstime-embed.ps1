@@ -231,7 +231,7 @@ function Invoke-ExifToolWrite([string]$ExifTool, [string]$File, [string]$Title, 
   $objectName = Limit-Text $Title 64
   $creatorTool = if([string]::IsNullOrWhiteSpace($AiModel)) { 'MetaGen Dreamstime Embed' } else { "MetaGen Dreamstime Embed; $AiModel" }
 
-  $args = @(
+  $exifArgs = @(
     '-overwrite_original',
     '-charset', 'IPTC=UTF8',
     '-sep', ', ',
@@ -249,17 +249,17 @@ function Invoke-ExifToolWrite([string]$ExifTool, [string]$File, [string]$Title, 
   )
 
   if($AiMode -eq 'ai') {
-    $args += '-XMP-iptcExt:DigitalSourceType=http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia'
+    $exifArgs += '-XMP-iptcExt:DigitalSourceType=http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia'
   }
 
-  $args += $File
-  $output = & $ExifTool @args 2>&1
+  $exifArgs += $File
+  $output = & $ExifTool @exifArgs 2>&1
   $code = $LASTEXITCODE
   return [pscustomobject]@{ ExitCode = $code; Output = ($output -join "`n") }
 }
 
 function Invoke-ExifToolVerify([string]$ExifTool, [string]$File) {
-  $args = @(
+  $exifArgs = @(
     '-j',
     '-charset', 'IPTC=UTF8',
     '-IPTC:Headline',
@@ -271,7 +271,7 @@ function Invoke-ExifToolVerify([string]$ExifTool, [string]$File) {
     '-XMP-iptcExt:DigitalSourceType',
     $File
   )
-  $json = & $ExifTool @args 2>$null
+  $json = & $ExifTool @exifArgs 2>$null
   if($LASTEXITCODE -ne 0 -or -not $json) { return $null }
   return ($json -join "`n") | ConvertFrom-Json
 }
