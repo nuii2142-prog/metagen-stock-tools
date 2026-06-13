@@ -10,7 +10,7 @@
   border="thin"
   borderstyle="normal"
   caption="yes"
-  icon="C:\Users\Darks\Documents\GPT META gen\assets\dreamstime-tool-icon.ico"
+  icon="assets\dreamstime-tool-icon.ico"
   maximizebutton="no"
   minimizebutton="yes"
   scroll="yes"
@@ -60,8 +60,9 @@ button{height:36px;border:0;border-radius:8px;padding:0 14px;font-weight:800;cur
 .actionHint{font-size:12px;color:#7b746c;margin-bottom:7px}
 </style>
 <script language="javascript">
-var SCRIPT_PATH = "C:\\Users\\Darks\\Documents\\GPT META gen\\dreamstime-embed.ps1";
-var DEFAULT_FOLDER = "C:\\Users\\Darks\\Pictures\\2026 RE Submit Stock\\Pre Submit Vecteezy";
+var APP_DIR = "";          // folder containing this .hta — resolved in init()
+var SCRIPT_PATH = "";      // APP_DIR\dreamstime-embed.ps1
+var SETTINGS_PATH = "";    // %APPDATA%\DreamstimeMetadataTool\settings.txt
 var shell = null;
 var fso = null;
 var currentFolder = "";
@@ -71,6 +72,15 @@ var running = false;
 
 function $(id){ return document.getElementById(id); }
 
+function appDir(){
+  // location.pathname is like /C:/Users/.../Dreamstime%20Metadata%20Tool.hta
+  var p = String(location.pathname || "");
+  try { p = decodeURIComponent(p); } catch(e){}
+  p = p.replace(/^\//, "").replace(/\//g, "\\");
+  var slash = p.lastIndexOf("\\");
+  return slash > 0 ? p.substring(0, slash) : p;
+}
+
 function init(){
   try{
     shell = new ActiveXObject("WScript.Shell");
@@ -79,10 +89,10 @@ function init(){
     setError("Windows blocked local app permissions. Open this file by double-clicking it, not inside a web browser.");
     return;
   }
+  APP_DIR = appDir();
+  SCRIPT_PATH = APP_DIR + "\\dreamstime-embed.ps1";
+  SETTINGS_PATH = shell.ExpandEnvironmentStrings("%APPDATA%") + "\\DreamstimeMetadataTool\\settings.txt";
   resizeTo(780,740);
-  if(fso.FolderExists(DEFAULT_FOLDER)){
-    setFolder(DEFAULT_FOLDER);
-  }
 }
 
 function cleanPath(p){
