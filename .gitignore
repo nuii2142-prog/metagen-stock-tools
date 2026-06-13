@@ -1,0 +1,15 @@
+# Generated tooling output (re-creatable)
+graphify-out/
+
+# ExifTool portable download cache (auto-installed by dreamstime-embed.ps1)
+dreamstime-tool/tools/
+tools/
+
+# Exported CSVs and tool output folders
+MetaGen_*.csv
+Dreamstime Ready */
+
+# Logs and OS noise
+*.log
+Thumbs.db
+desktop.ini

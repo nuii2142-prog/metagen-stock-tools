@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="x-ua-compatible" content="IE=11">
+<meta charset="UTF-8">
+<title>Dreamstime Metadata Tool</title>
+<hta:application
+  id="DreamstimeMetadataTool"
+  applicationname="Dreamstime Metadata Tool"
+  border="thin"
+  borderstyle="normal"
+  caption="yes"
+  icon="C:\Users\Darks\Documents\GPT META gen\assets\dreamstime-tool-icon.ico"
+  maximizebutton="no"
+  minimizebutton="yes"
+  scroll="yes"
+  showintaskbar="yes"
+  singleinstance="yes"
+  sysmenu="yes"
+  windowstate="normal">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:760px;min-height:680px}
+body{font-family:Segoe UI,Arial,sans-serif;background:#f6f3ee;color:#2e2a25;overflow:auto}
+.wrap{padding:18px 22px 112px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:11px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 1px 5px rgba(44,38,30,.18)}
+.logo img{width:100%;height:100%;display:block}
+h1{font-size:23px;margin:0;letter-spacing:-.3px}
+.sub{font-size:12px;color:#7b746c;margin-top:3px}
+.badge{font-size:12px;background:#e9f7ef;color:#0b7a3b;border:1px solid #cdebd9;padding:6px 10px;border-radius:999px;font-weight:700}
+.panel{background:#fff;border:1px solid #ded7ce;border-radius:12px;padding:13px 14px;margin-bottom:12px;box-shadow:0 2px 10px rgba(44,38,30,.05)}
+.step{display:flex;gap:12px;align-items:flex-start}
+.num{width:28px;height:28px;border-radius:50%;background:#c8891a;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 28px}
+.body{flex:1}
+.title{font-size:15px;font-weight:800;margin-bottom:8px}
+.row{display:flex;gap:8px;align-items:center}
+input[type=text],select{width:100%;height:36px;border:1px solid #d7d0c6;border-radius:8px;padding:0 10px;font-size:13px;background:#fbfaf8;color:#2e2a25}
+button{height:36px;border:0;border-radius:8px;padding:0 14px;font-weight:800;cursor:pointer;font-size:13px}
+.btn{background:#2e2a25;color:#fff}
+.btn2{background:#ece7df;color:#4f473e;border:1px solid #d7d0c6}
+.btn2:hover{background:#e2dbd0}
+.btnMain{width:100%;height:48px;background:#0b7a3b;color:#fff;font-size:16px;border-radius:10px}
+.btnMain:disabled{background:#b4b0aa;cursor:not-allowed}
+.status{font-size:12px;margin-top:8px;color:#7b746c}
+.ok{color:#0b7a3b;font-weight:700}
+.err{color:#b42318;font-weight:700}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.choice{height:36px;display:flex;align-items:center;gap:8px;background:#fbfaf8;border:1px solid #d7d0c6;border-radius:8px;padding:0 10px;font-size:13px}
+.checkRow{height:34px;display:flex;align-items:center;gap:8px;font-size:13px;color:#4f473e}
+.checkRow input{width:16px;height:16px}
+.log{width:100%;height:92px;resize:none;border:1px solid #d7d0c6;border-radius:8px;background:#151515;color:#f5f5f5;padding:10px;font:12px Consolas,monospace}
+.hint{font-size:12px;color:#7b746c;line-height:1.45;margin-top:8px}
+.footerBtns{display:flex;gap:8px;margin-top:10px}
+.footerBtns button{flex:1}
+.small{font-size:11px;color:#8b8379}
+.actionBar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #ded7ce;padding:14px 22px;box-shadow:0 -4px 18px rgba(44,38,30,.09)}
+.actionGrid{display:grid;grid-template-columns:1fr 180px;gap:10px;align-items:center}
+.actionHint{font-size:12px;color:#7b746c;margin-bottom:7px}
+</style>
+<script language="javascript">
+var SCRIPT_PATH = "C:\\Users\\Darks\\Documents\\GPT META gen\\dreamstime-embed.ps1";
+var DEFAULT_FOLDER = "C:\\Users\\Darks\\Pictures\\2026 RE Submit Stock\\Pre Submit Vecteezy";
+var shell = null;
+var fso = null;
+var currentFolder = "";
+var currentCsv = "";
+var lastOutputFolder = "";
+var running = false;
+
+function $(id){ return document.getElementById(id); }
+
+function init(){
+  try{
+    shell = new ActiveXObject("WScript.Shell");
+    fso = new ActiveXObject("Scripting.FileSystemObject");
+  }catch(e){
+    setError("Windows blocked local app permissions. Open this file by double-clicking it, not inside a web browser.");
+    return;
+  }
+  resizeTo(780,740);
+  if(fso.FolderExists(DEFAULT_FOLDER)){
+    setFolder(DEFAULT_FOLDER);
+  }
+}
+
+function cleanPath(p){
+  p = String(p || "");
+  while(p.length > 3 && (p.substr(p.length-1) == "\\" || p.substr(p.length-1) == "/")){
+    p = p.substr(0,p.length-1);
+  }
+  return p;
+}
+
+function q(s){
+  return "\"" + String(s || "").replace(/"/g,"") + "\"";
+}
+
+function psQuote(s){
+  return "'" + String(s || "").replace(/'/g,"''") + "'";
+}
+
+function tempBase(name){
+  return shell.ExpandEnvironmentStrings("%TEMP%") + "\\" + name + "-" + (new Date().getTime());
+}
+
+function writeUnicodeText(path, text){
+  var file = fso.CreateTextFile(path, true, true);
+  file.Write(text);
+  file.Close();
+}
+
+function readUnicodeText(path){
+  if(!fso.FileExists(path)){ return ""; }
+  var file = fso.OpenTextFile(path, 1, false, -1);
+  var text = file.ReadAll();
+  file.Close();
+  return String(text || "").replace(/^\s+|\s+$/g, "");
+}
+
+function runPickerScript(scriptText){
+  var base = tempBase("dreamstime-tool-picker");
+  var ps1 = base + ".ps1";
+  var out = base + ".txt";
+  writeUnicodeText(ps1, "$ErrorActionPreference='Stop'\r\n$outFile=" + psQuote(out) + "\r\n" + scriptText);
+  try{
+    var code = shell.Run("powershell -NoProfile -STA -ExecutionPolicy Bypass -WindowStyle Hidden -File " + q(ps1), 1, true);
+    if(code !== 0){ return ""; }
+    return readUnicodeText(out);
+  }catch(e){
+    setError("Could not open Windows picker: " + e.message);
+    return "";
+  }finally{
+    try{ if(fso.FileExists(ps1)){ fso.DeleteFile(ps1, true); } }catch(e1){}
+    try{ if(fso.FileExists(out)){ fso.DeleteFile(out, true); } }catch(e2){}
+  }
+}
+
+function pad(n){ return n < 10 ? "0" + n : String(n); }
+
+function stamp(){
+  var d = new Date();
+  return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()) + "_" + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
+}
+
+function chooseFolder(){
+  var initial = currentFolder && fso.FolderExists(currentFolder) ? currentFolder : "C:\\Users\\Darks\\Pictures";
+  var script =
+    "Add-Type -AssemblyName System.Windows.Forms\r\n" +
+    "$d = New-Object System.Windows.Forms.FolderBrowserDialog\r\n" +
+    "$d.Description = 'Select the folder that contains your images'\r\n" +
+    "$d.SelectedPath = " + psQuote(initial) + "\r\n" +
+    "$d.ShowNewFolderButton = $true\r\n" +
+    "if($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK){ Set-Content -LiteralPath $outFile -Encoding Unicode -Value $d.SelectedPath }\r\n";
+  var picked = runPickerScript(script);
+  if(picked){ setFolder(picked); }
+}
+
+function setFolder(path){
+  currentFolder = cleanPath(path);
+  $("folderPath").value = currentFolder;
+  findLatestCsv();
+}
+
+function chooseCsv(){
+  var initial = currentFolder && fso.FolderExists(currentFolder) ? currentFolder : "C:\\Users\\Darks\\Documents";
+  var script =
+    "Add-Type -AssemblyName System.Windows.Forms\r\n" +
+    "$d = New-Object System.Windows.Forms.OpenFileDialog\r\n" +
+    "$d.Title = 'Select Dreamstime CSV from MetaGen'\r\n" +
+    "$d.InitialDirectory = " + psQuote(initial) + "\r\n" +
+    "$d.Filter = 'CSV files (*.csv)|*.csv|All files (*.*)|*.*'\r\n" +
+    "$d.Multiselect = $false\r\n" +
+    "if($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK){ Set-Content -LiteralPath $outFile -Encoding Unicode -Value $d.FileName }\r\n";
+  var picked = runPickerScript(script);
+  if(picked){ setCsv(picked); }
+}
+
+function setCsv(path){
+  currentCsv = cleanPath(path);
+  $("csvPath").value = currentCsv;
+  if(fso.FileExists(currentCsv)){
+    setStatus("Ready. CSV selected manually.", true);
+  }else{
+    setStatus("Selected CSV file was not found.", false);
+  }
+}
+
+function findLatestCsv(){
+  currentCsv = "";
+  $("csvPath").value = "";
+  if(!currentFolder || !fso.FolderExists(currentFolder)){
+    setStatus("Choose a work folder first.", false);
+    return;
+  }
+
+  var folder = fso.GetFolder(currentFolder);
+  var files = new Enumerator(folder.Files);
+  var latest = null;
+  var latestTime = 0;
+
+  for(; !files.atEnd(); files.moveNext()){
+    var file = files.item();
+    var name = String(file.Name);
+    if(/^MetaGen_Dreamstime_.*\.csv$/i.test(name)){
+      var t = new Date(file.DateLastModified).getTime();
+      if(t > latestTime){
+        latestTime = t;
+        latest = file;
+      }
+    }
+  }
+
+  if(latest){
+    currentCsv = latest.Path;
+    $("csvPath").value = currentCsv;
+    setStatus("Ready. Latest Dreamstime CSV found.", true);
+  }else{
+    setStatus("No MetaGen_Dreamstime_*.csv found in this folder.", false);
+  }
+}
+
+function setStatus(msg, good){
+  $("folderStatus").className = good ? "status ok" : "status";
+  $("folderStatus").innerText = msg;
+}
+
+function setError(msg){
+  $("runStatus").className = "status err";
+  $("runStatus").innerText = msg;
+}
+
+function setRunStatus(msg, good){
+  $("runStatus").className = good ? "status ok" : "status";
+  $("runStatus").innerText = msg;
+}
+
+function notifyDone(success){
+  if(!$("soundDone") || !$("soundDone").checked){ return; }
+  try{
+    var sound = success ? "C:\\Windows\\Media\\Windows Notify System Generic.wav" : "C:\\Windows\\Media\\Windows Critical Stop.wav";
+    if(fso && fso.FileExists(sound)){
+      shell.Run("powershell -NoProfile -WindowStyle Hidden -Command \"(New-Object Media.SoundPlayer '" + sound.replace(/\\/g,"\\\\") + "').PlaySync()\"", 0, false);
+    }else{
+      shell.Run("rundll32 user32.dll,MessageBeep", 0, false);
+    }
+  }catch(e){}
+}
+
+function makeOutputFolder(){
+  var base = currentFolder + "\\Dreamstime Ready " + stamp();
+  var out = base;
+  var i = 2;
+  while(fso.FolderExists(out)){
+    out = base + " (" + i + ")";
+    i++;
+  }
+  return out;
+}
+
+function runEmbed(){
+  if(running){ return; }
+  if(!currentFolder || !fso.FolderExists(currentFolder)){
+    setError("Choose a valid work folder first.");
+    return;
+  }
+  if(!currentCsv || !fso.FileExists(currentCsv)){
+    findLatestCsv();
+  }
+  if(!currentCsv || !fso.FileExists(currentCsv)){
+    setError("Dreamstime CSV is missing. Choose a CSV file or export Dreamstime CSV from MetaGen.");
+    return;
+  }
+  if(!fso.FileExists(SCRIPT_PATH)){
+    setError("Missing script: " + SCRIPT_PATH);
+    return;
+  }
+
+  var mode = $("modeAi").checked ? "ai" : "nonai";
+  var model = $("model").value;
+  lastOutputFolder = makeOutputFolder();
+  $("outputPath").value = lastOutputFolder;
+  $("log").value = "Running...\r\nPlease wait. This may take a minute for many images.\r\n";
+  $("openBtn").disabled = true;
+  $("runBtn").disabled = true;
+  running = true;
+  setRunStatus("Working. Please wait...", false);
+
+  var cmd = "powershell -NoProfile -ExecutionPolicy Bypass -File " + q(SCRIPT_PATH) +
+    " -Csv " + q(currentCsv) +
+    " -ImagesDir " + q(currentFolder) +
+    " -OutDir " + q(lastOutputFolder) +
+    " -AiMode " + q(mode) +
+    " -AiModel " + q(model);
+
+  try{
+    var exec = shell.Exec(cmd);
+    poll(exec);
+  }catch(e){
+    running = false;
+    $("runBtn").disabled = false;
+    setError("Could not start the tool: " + e.message);
+  }
+}
+
+function poll(exec){
+  if(exec.Status === 0){
+    window.setTimeout(function(){ poll(exec); }, 700);
+    return;
+  }
+
+  var out = "";
+  var err = "";
+  try{ out = exec.StdOut.ReadAll(); }catch(e1){}
+  try{ err = exec.StdErr.ReadAll(); }catch(e2){}
+
+  $("log").value = (out || "") + (err ? "\r\nERROR:\r\n" + err : "");
+  running = false;
+  $("runBtn").disabled = false;
+
+  if(exec.ExitCode === 0){
+    $("openBtn").disabled = false;
+    setRunStatus("Done. Upload images from the output folder.", true);
+    notifyDone(true);
+    openOutput();
+  }else{
+    setError("Something went wrong. Check the log box below.");
+    notifyDone(false);
+  }
+}
+
+function openOutput(){
+  if(lastOutputFolder && fso.FolderExists(lastOutputFolder)){
+    shell.Run("explorer.exe " + q(lastOutputFolder), 1, false);
+  }
+}
+
+function openWorkFolder(){
+  if(currentFolder && fso.FolderExists(currentFolder)){
+    shell.Run("explorer.exe " + q(currentFolder), 1, false);
+  }
+}
+</script>
+</head>
+<body onload="init()">
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <div class="logo"><img src="assets/dreamstime-tool-icon.png"></div>
+      <div>
+        <h1>Dreamstime Metadata Tool</h1>
+        <div class="sub">Pick folder, embed metadata, upload the ready images.</div>
+      </div>
+    </div>
+    <div class="badge">No originals edited</div>
+  </div>
+
+  <div class="panel">
+    <div class="step">
+      <div class="num">1</div>
+      <div class="body">
+        <div class="title">Choose your work folder</div>
+        <div class="row">
+          <input id="folderPath" type="text" readonly>
+          <button class="btn2" onclick="chooseFolder()">Choose Folder</button>
+          <button class="btn2" onclick="openWorkFolder()">Open</button>
+        </div>
+        <div class="hint">Choose the folder that contains your JPG files. It can be any folder on your computer.</div>
+        <div id="folderStatus" class="status">Choose a folder.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="step">
+      <div class="num">2</div>
+      <div class="body">
+        <div class="title">CSV and AI settings</div>
+        <div class="row">
+          <input id="csvPath" type="text" readonly>
+          <button class="btn2" onclick="chooseCsv()">Choose CSV</button>
+          <button class="btn2" onclick="findLatestCsv()">Latest</button>
+        </div>
+        <div class="grid" style="margin-top:10px">
+          <label class="choice"><input id="modeAi" name="mode" type="radio" checked> AI-generated images</label>
+          <label class="choice"><input id="modeNonAi" name="mode" type="radio"> Not AI</label>
+        </div>
+        <div style="margin-top:10px">
+          <select id="model">
+            <option>Adobe Firefly</option>
+            <option>Midjourney 5</option>
+            <option>Midjourney 5.1</option>
+            <option>Leonardo</option>
+            <option>Dall-e 2</option>
+            <option>Stable Diffusion 2.1</option>
+          </select>
+        </div>
+        <label class="checkRow"><input id="soundDone" type="checkbox" checked> Play sound when done</label>
+        <div class="small" style="margin-top:8px">Use Choose CSV for any file, or Latest to use the newest MetaGen_Dreamstime_*.csv in the selected folder.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="step">
+      <div class="num">3</div>
+      <div class="body">
+        <div class="title">Output and progress</div>
+        <div style="margin-top:10px">
+          <input id="outputPath" type="text" readonly placeholder="A new Dreamstime Ready folder will be created every run">
+        </div>
+        <div id="runStatus" class="status">Ready.</div>
+        <textarea id="log" class="log" readonly></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="actionBar">
+  <div class="actionHint">Step 3: press the green button. A new Dreamstime Ready folder will be created automatically.</div>
+  <div class="actionGrid">
+    <button id="runBtn" class="btnMain" onclick="runEmbed()">Embed Metadata</button>
+    <button id="openBtn" class="btn2" onclick="openOutput()" disabled>Open Output Folder</button>
+  </div>
+</div>
+</body>
+</html>
