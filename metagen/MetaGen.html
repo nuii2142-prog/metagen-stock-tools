@@ -1313,21 +1313,23 @@ applyKeywordPolicyDefaults();
    PLATFORM UI DATA
    ============================ */
 const PLATS = [
-  {id:'Adobe',     nm:'Adobe',      ic:'St', bg:'#e8231a'},
-  {id:'Shutterstock',nm:'Shutterstock',ic:'SS',bg:'#ee2222'},
-  {id:'Freepik',   nm:'Freepik',   ic:'FP', bg:'#1273eb'},
-  {id:'iStock',    nm:'iStock',    ic:'iS', bg:'#1e1e1e'},
-  {id:'Getty',     nm:'Getty',     ic:'G',  bg:'#1b1b1b'},
-  {id:'Dreamstime',nm:'Dreams...',  ic:'Dt', bg:'#007dc3'},
-  {id:'123RF',     nm:'123RF',     ic:'3F', bg:'#f5a623'},
-  {id:'Pond5',     nm:'Pond5',     ic:'P5', bg:'#00c4b4'},
-  {id:'Depositphotos',nm:'Deposit...',ic:'DP',bg:'#222'},
-  {id:'Alamy',     nm:'Alamy',     ic:'Al', bg:'#1b4d3e'},
-  {id:'Vecteezy',  nm:'Vecteezy', ic:'Vz', bg:'#ff6b35'},
-  {id:'Canva',     nm:'Canva',     ic:'Ca', bg:'#00c4cc'},
-  {id:'Motionarray',nm:'Motion...',ic:'Mo', bg:'#6c4fff'},
-  {id:'General',   nm:'General',   ic:'✦',  bg:'#00c47a'},
+  {id:'Adobe',        nm:'Adobe',      ic:'St', bg:'#e8231a', tier:'verified'},
+  {id:'Shutterstock', nm:'Shutterstock',ic:'SS',bg:'#ee2222', tier:'verified'},
+  {id:'Freepik',      nm:'Freepik',   ic:'FP', bg:'#1273eb', tier:'verified'},
+  {id:'Dreamstime',   nm:'Dreams...',  ic:'Dt', bg:'#007dc3', tier:'verified'},
+  {id:'123RF',        nm:'123RF',     ic:'3F', bg:'#f5a623', tier:'verified'},
+  {id:'Pond5',        nm:'Pond5',     ic:'P5', bg:'#00c4b4', tier:'verified'},
+  {id:'Vecteezy',     nm:'Vecteezy', ic:'Vz', bg:'#ff6b35', tier:'verified'},
+  {id:'General',      nm:'General',   ic:'✦',  bg:'#00c47a', tier:'verified'},
+  {id:'iStock',       nm:'iStock',    ic:'iS', bg:'#1e1e1e', tier:'untested'},
+  {id:'Getty',        nm:'Getty',     ic:'G',  bg:'#1b1b1b', tier:'untested'},
+  {id:'Depositphotos',nm:'Deposit...',ic:'DP',bg:'#222',     tier:'untested'},
+  {id:'Alamy',        nm:'Alamy',     ic:'Al', bg:'#1b4d3e', tier:'untested'},
+  {id:'Canva',        nm:'Canva',     ic:'Ca', bg:'#00c4cc', tier:'untested'},
+  {id:'Motionarray',  nm:'Motion...',ic:'Mo', bg:'#6c4fff', tier:'untested'},
 ];
+const PLAT_TIER = Object.fromEntries(PLATS.map(p => [p.id, p.tier]));
+function isUntested(id){ return PLAT_TIER[id] === 'untested'; }
 
 /* ============================
    STATE
