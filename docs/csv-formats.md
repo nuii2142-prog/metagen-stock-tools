@@ -2,7 +2,7 @@
 
 This is the single source of truth for every per-platform CSV that **MetaGen** can export.
 All numbers below come directly from the `PLAT_SPECS` object in
-[`metagen/MetaGen.html`](../metagen/MetaGen.html). If the code and this table ever
+[`metagen/index.html`](../metagen/index.html). If the code and this table ever
 disagree, the code wins — update this file to match.
 
 ## Status legend
@@ -62,7 +62,7 @@ into the green group in MetaGen's UI. It is a one-line change:
 1. **Do a real test first.** Generate metadata in MetaGen, export that platform's CSV,
    upload it on the actual platform, and confirm it imports cleanly (title, description,
    keywords, and category all land correctly).
-2. **Open** [`metagen/MetaGen.html`](../metagen/MetaGen.html) in a text editor.
+2. **Open** [`metagen/index.html`](../metagen/index.html) in a text editor.
 3. **Find the `PLATS` array** (search for `const PLATS = [`). Each platform is one line, e.g.:
    ```js
    {id:'Alamy', nm:'Alamy', ic:'Al', bg:'#1b4d3e', tier:'untested'},

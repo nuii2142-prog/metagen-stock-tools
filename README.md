@@ -37,7 +37,7 @@ character limits per platform, plus how to promote a platform from untested to v
 
 ### MetaGen
 
-1. Double-click [`metagen/MetaGen.html`](./metagen/MetaGen.html) — it opens in your browser. Nothing to install.
+1. Double-click [`metagen/index.html`](./metagen/index.html) — it opens in your browser. Nothing to install.
 2. Pick an AI provider (Claude / OpenAI / Gemini) and paste your API key, then click **Test →**.
 3. Adjust the title / description / keyword sliders, pick your target platforms, and drop in your images.
 4. Click **✦ Generate**, review/edit the rows, then **↓ CSV** (one platform) or **↓ All** (every active platform).
@@ -72,7 +72,7 @@ Fable Metagen/
 ├── LICENSE                            ← MIT
 ├── .gitignore
 ├── metagen/
-│   └── MetaGen.html                   ← the single-file browser app
+│   └── index.html                   ← the single-file browser app
 ├── dreamstime-tool/
 │   ├── Dreamstime Metadata Tool.hta   ← GUI launcher
 │   ├── dreamstime-embed.ps1           ← the embedding engine
