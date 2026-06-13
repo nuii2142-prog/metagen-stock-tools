@@ -4,6 +4,28 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-06-13
+
+### MetaGen
+
+- **Deployed online.** MetaGen is now hosted on Vercel and auto-deploys from `main`
+  (<https://metagen-stock-tools-tioj.vercel.app/>). Renamed `metagen/MetaGen.html` →
+  `metagen/index.html` so the bare site URL serves the app with no extra config; removed the
+  interim `vercel.json`. Local use is unchanged — double-click `metagen/index.html`.
+
+### Dreamstime Metadata Tool
+
+- **Single self-contained file.** `Dreamstime Metadata Tool.hta` now embeds the PowerShell
+  script plus its icon/logo (base64) and unpacks them to `%APPDATA%\DreamstimeMetadataTool`
+  at runtime, so the `.hta` works on its own — copy just that one file anywhere, no `.ps1`
+  or `assets/` folder needed alongside it. `dreamstime-embed.ps1` and the `.bat` remain as
+  the readable source of truth and an optional command-line path.
+- **Desktop shortcut button.** Added a **📌 Desktop Shortcut** button that drops a
+  nicely-iconned shortcut on your Desktop. (Windows shows generic icons on `.hta`/`.bat`
+  files themselves; a shortcut is the supported way to get a custom program icon.)
+- **Build script.** `dreamstime-tool/build-standalone-hta.ps1` regenerates the embedded
+  payloads from the source files — re-run it after editing `dreamstime-embed.ps1`.
+
 ## [1.0.0] - 2026-06-13
 
 First public release. This round restructured both tools into a single GitHub-ready
