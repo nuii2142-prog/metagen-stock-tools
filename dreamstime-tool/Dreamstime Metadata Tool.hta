@@ -81,6 +81,35 @@ function appDir(){
   return slash > 0 ? p.substring(0, slash) : p;
 }
 
+function readSettings(){
+  var s = {};
+  try{
+    if(!fso.FileExists(SETTINGS_PATH)) return s;
+    var f = fso.OpenTextFile(SETTINGS_PATH, 1, false, -1);
+    var txt = f.ReadAll(); f.Close();
+    var lines = String(txt||"").split(/\r?\n/);
+    for(var i=0;i<lines.length;i++){
+      var eq = lines[i].indexOf("=");
+      if(eq>0) s[lines[i].substring(0,eq)] = lines[i].substring(eq+1);
+    }
+  }catch(e){}
+  return s;
+}
+function writeSettings(){
+  try{
+    var dir = shell.ExpandEnvironmentStrings("%APPDATA%") + "\\DreamstimeMetadataTool";
+    if(!fso.FolderExists(dir)) fso.CreateFolder(dir);
+    var lines = [
+      "lastFolder=" + (currentFolder||""),
+      "aiMode=" + ($("modeAi").checked ? "ai" : "nonai"),
+      "aiModel=" + $("model").value,
+      "sound=" + ($("soundDone").checked ? "1" : "0")
+    ];
+    var f = fso.CreateTextFile(SETTINGS_PATH, true, true);
+    f.Write(lines.join("\r\n")); f.Close();
+  }catch(e){}
+}
+
 function init(){
   try{
     shell = new ActiveXObject("WScript.Shell");
@@ -93,6 +122,15 @@ function init(){
   SCRIPT_PATH = APP_DIR + "\\dreamstime-embed.ps1";
   SETTINGS_PATH = shell.ExpandEnvironmentStrings("%APPDATA%") + "\\DreamstimeMetadataTool\\settings.txt";
   resizeTo(780,740);
+  var s = readSettings();
+  if(s.aiMode === "nonai"){ $("modeNonAi").checked = true; } else { $("modeAi").checked = true; }
+  if(s.aiModel){ var opts=$("model").options; for(var i=0;i<opts.length;i++){ if(opts[i].value===s.aiModel||opts[i].text===s.aiModel){ $("model").selectedIndex=i; break; } } }
+  if(s.sound === "0"){ $("soundDone").checked = false; }
+  if(s.lastFolder && fso.FolderExists(s.lastFolder)){
+    setFolder(s.lastFolder);
+  } else {
+    setStatus("Choose your work folder to begin.", false);
+  }
 }
 
 function cleanPath(p){
@@ -171,6 +209,7 @@ function setFolder(path){
   currentFolder = cleanPath(path);
   $("folderPath").value = currentFolder;
   findLatestCsv();
+  writeSettings();
 }
 
 function chooseCsv(){
@@ -296,6 +335,7 @@ function runEmbed(){
   $("runBtn").disabled = true;
   running = true;
   setRunStatus("Working. Please wait...", false);
+  writeSettings();
 
   var cmd = "powershell -NoProfile -ExecutionPolicy Bypass -File " + q(SCRIPT_PATH) +
     " -Csv " + q(currentCsv) +
@@ -397,7 +437,7 @@ function openWorkFolder(){
           <label class="choice"><input id="modeNonAi" name="mode" type="radio"> Not AI</label>
         </div>
         <div style="margin-top:10px">
-          <select id="model">
+          <select id="model" onchange="writeSettings()">
             <option>Adobe Firefly</option>
             <option>Midjourney 5</option>
             <option>Midjourney 5.1</option>
@@ -406,7 +446,7 @@ function openWorkFolder(){
             <option>Stable Diffusion 2.1</option>
           </select>
         </div>
-        <label class="checkRow"><input id="soundDone" type="checkbox" checked> Play sound when done</label>
+        <label class="checkRow"><input id="soundDone" type="checkbox" checked onchange="writeSettings()"> Play sound when done</label>
         <div class="small" style="margin-top:8px">Use Choose CSV for any file, or Latest to use the newest MetaGen_Dreamstime_*.csv in the selected folder.</div>
       </div>
     </div>
