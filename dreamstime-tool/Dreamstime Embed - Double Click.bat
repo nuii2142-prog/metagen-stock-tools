@@ -4,7 +4,21 @@ setlocal
 
 set "THIS=%~dp0"
 if "%THIS:~-1%"=="\" set "THIS=%THIS:~0,-1%"
-set "SCRIPT=C:\Users\Darks\Documents\GPT META gen\dreamstime-embed.ps1"
+rem -- Where is dreamstime-embed.ps1? -----------------------------
+rem 1) Same folder as this file (default - keep them together)
+rem 2) Edit INSTALL_DIR below if you move the .ps1 elsewhere
+set "INSTALL_DIR=%USERPROFILE%\Documents\Fable Metagen\dreamstime-tool"
+set "SCRIPT=%THIS%\dreamstime-embed.ps1"
+if not exist "%SCRIPT%" set "SCRIPT=%INSTALL_DIR%\dreamstime-embed.ps1"
+if not exist "%SCRIPT%" (
+  echo.
+  echo Could not find dreamstime-embed.ps1.
+  echo Put this .bat in the same folder as dreamstime-embed.ps1,
+  echo or edit the INSTALL_DIR line inside this .bat.
+  echo.
+  pause
+  exit /b 1
+)
 set "CSV="
 
 if not "%~1"=="" set "CSV=%~1"
