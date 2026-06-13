@@ -56,7 +56,7 @@ button{height:36px;border:0;border-radius:8px;padding:0 14px;font-weight:800;cur
 .footerBtns button{flex:1}
 .small{font-size:11px;color:#8b8379}
 .actionBar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #ded7ce;padding:14px 22px;box-shadow:0 -4px 18px rgba(44,38,30,.09)}
-.actionGrid{display:grid;grid-template-columns:1fr 180px;gap:10px;align-items:center}
+.actionGrid{display:grid;grid-template-columns:1fr 150px 150px;gap:10px;align-items:center}
 .actionHint{font-size:12px;color:#7b746c;margin-bottom:7px}
 </style>
 <script language="javascript">
@@ -399,6 +399,33 @@ function poll(exec){
   }
 }
 
+function runDryRun(){
+  if(running){ return; }
+  if(!currentFolder || !fso.FolderExists(currentFolder)){ setError("Choose a valid work folder first."); return; }
+  if(!currentCsv || !fso.FileExists(currentCsv)){ findLatestCsv(); }
+  if(!currentCsv || !fso.FileExists(currentCsv)){ setError("Dreamstime CSV is missing. Choose a CSV or export one from MetaGen."); return; }
+  if(!fso.FileExists(SCRIPT_PATH)){ setError("Missing script: " + SCRIPT_PATH); return; }
+  $("log").value = "Dry run — checking which CSV rows match images. Nothing will be written.\r\n";
+  $("runBtn").disabled = true; $("dryBtn").disabled = true; running = true;
+  setRunStatus("Dry run in progress...", false);
+  var cmd = "powershell -NoProfile -ExecutionPolicy Bypass -File " + q(SCRIPT_PATH) +
+    " -Csv " + q(currentCsv) + " -ImagesDir " + q(currentFolder) +
+    " -OutDir " + q(currentFolder + "\\__dryrun_unused") + " -DryRun";
+  try{
+    var exec = shell.Exec(cmd);
+    pollDry(exec);
+  }catch(e){ running=false; $("runBtn").disabled=false; $("dryBtn").disabled=false; setError("Could not start dry run: " + e.message); }
+}
+function pollDry(exec){
+  if(exec.Status === 0){ window.setTimeout(function(){ pollDry(exec); }, 500); return; }
+  var out=""; var err="";
+  try{ out = exec.StdOut.ReadAll(); }catch(e1){}
+  try{ err = exec.StdErr.ReadAll(); }catch(e2){}
+  $("log").value = (out||"") + (err ? "\r\nERROR:\r\n"+err : "");
+  running=false; $("runBtn").disabled=false; $("dryBtn").disabled=false;
+  setRunStatus(exec.ExitCode===0 ? "Dry run complete — review the log, then press Embed Metadata." : "Dry run failed — check the log.", exec.ExitCode===0);
+}
+
 function openOutput(){
   if(lastOutputFolder && fso.FolderExists(lastOutputFolder)){
     shell.Run("explorer.exe " + q(lastOutputFolder), 1, false);
@@ -490,6 +517,7 @@ function openWorkFolder(){
   <div class="actionHint">Step 3: press the green button. A new Dreamstime Ready folder will be created automatically.</div>
   <div class="actionGrid">
     <button id="runBtn" class="btnMain" onclick="runEmbed()">Embed Metadata</button>
+    <button id="dryBtn" class="btn2" onclick="runDryRun()" title="Preview CSV-to-image matching without writing anything">🧪 Dry Run</button>
     <button id="openBtn" class="btn2" onclick="openOutput()" disabled>Open Output Folder</button>
   </div>
 </div>
