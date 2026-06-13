@@ -61,7 +61,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT%" -Csv "%CSV%" -Ima
 
 echo.
 if errorlevel 1 (
-  echo Something went wrong. Please send Codex a screenshot of this window.
+  echo Something went wrong. Read the messages above, or open an issue
+  echo on the project's GitHub page with a copy of this window.
 ) else (
   echo Done. Upload images from this new folder:
   echo %OUT%
