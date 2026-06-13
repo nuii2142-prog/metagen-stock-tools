@@ -429,6 +429,7 @@ td:hover .copy-btn,.td-title:hover .copy-btn{opacity:1;}
 </head>
 <body>
 <input type="file" id="fileIn" multiple accept="image/jpeg,image/png,image/webp,image/gif" style="display:none">
+<input type="file" id="sessionIn" accept="application/json,.json" style="display:none">
 
 <header>
   <div class="logo">
@@ -687,6 +688,8 @@ td:hover .copy-btn,.td-title:hover .copy-btn{opacity:1;}
         <span class="res-title">Results</span>
         <span class="res-ct" id="resCt">0 items</span>
       </div>
+        <button class="btn-clear-upload" id="btnSaveSession" onclick="saveSession()" disabled title="Save all generated results to a .json file you can reload later" style="border-color:var(--bd2);background:var(--sf2);color:var(--txd);">💾 Save</button>
+        <button class="btn-clear-upload" id="btnLoadSession" onclick="document.getElementById('sessionIn').click()" title="Load results from a saved .json session" style="border-color:var(--bd2);background:var(--sf2);color:var(--txd);">📂 Load</button>
       <button class="btn-clear-upload" id="btnClearResults" onclick="clearResults()" disabled title="Clear generated metadata results only. Uploaded images stay in the queue.">✕ Clear Results</button>
     </div>
     <div class="res-scroll" id="resScroll">
@@ -1551,6 +1554,11 @@ function togSw(id){
    FILES
    ============================ */
 document.getElementById('fileIn').addEventListener('change',e=>addFiles(e.target.files));
+document.getElementById('sessionIn').addEventListener('change',e=>{
+  const f=e.target.files[0];
+  if(f) loadSession(f);
+  e.target.value='';
+});
 function onDragOver(e){e.preventDefault();document.getElementById('dropZone').classList.add('over');}
 function onDragLeave(){document.getElementById('dropZone').classList.remove('over');}
 function onDrop(e){e.preventDefault();document.getElementById('dropZone').classList.remove('over');addFiles(e.dataTransfer.files);}
@@ -1642,6 +1650,8 @@ function refreshResultsState(opts={}){
   document.getElementById('btnCSVAll').disabled=!hasResults;
   const clearResultsBtn=document.getElementById('btnClearResults');
   if(clearResultsBtn)clearResultsBtn.disabled=isGen||!hasResults;
+  const saveBtn=document.getElementById('btnSaveSession');
+  if(saveBtn) saveBtn.disabled=isGen||!hasResults;
   document.getElementById('btnRegen').style.display=hasResults&&!isGen?'':'none';
   document.getElementById('resCt').textContent=`${results.length} item${results.length===1?'':'s'}`;
   if(!hasResults)clearExportWarnings();
@@ -2104,9 +2114,17 @@ function appendRow(idx,f,meta,expFmt){
   const regenBtn=document.createElement('button');
   regenBtn.type='button';
   regenBtn.className='edit-btn';
-  regenBtn.title='Re-generate this image';
-  regenBtn.textContent='🔄';
-  regenBtn.addEventListener('click',()=>regenSingle(idx));
+  if(f.restored){
+    regenBtn.title='Re-generate needs the original image (not stored in sessions)';
+    regenBtn.textContent='🔄';
+    regenBtn.disabled=true;
+    regenBtn.style.opacity='.35';
+    regenBtn.style.cursor='not-allowed';
+  }else{
+    regenBtn.title='Re-generate this image';
+    regenBtn.textContent='🔄';
+    regenBtn.addEventListener('click',()=>regenSingle(idx));
+  }
   const editBtn=document.createElement('button');
   editBtn.type='button';
   editBtn.className='edit-btn';
@@ -2405,6 +2423,72 @@ function validateExport(fmtId,cfg=getExportConfig()){
     if(fmtId==='Pond5' && /(\.jpe?g|\.png|\.webp|\.gif)$/i.test(r.title||'')) warnings.push(`${r.file.name}: title contains a file extension`);
   });
   return warnings;
+}
+
+/* ============================
+   SESSION SAVE / LOAD
+   ============================ */
+function saveSession(){
+  if(isGen){notif('Wait for generation to finish before saving','err');return;}
+  if(!results.length){notif('No results to save','err');return;}
+  const payload={
+    app:'MetaGen',
+    version:APP_VERSION,
+    savedAt:new Date().toISOString(),
+    results:results.map(r=>({
+      fileName:r.file?.name||'',
+      title:r.title||'',
+      description:r.description||'',
+      keywords:normalizeKeywords(r.keywords),
+      category:r.category||'',
+      _cost:r._cost??null,
+      _inputTokens:r._inputTokens??null,
+      _outputTokens:r._outputTokens??null
+    }))
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const d=new Date();
+  const stamp=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+  a.href=url; a.download=`MetaGen_Session_${stamp}.json`; a.click();
+  URL.revokeObjectURL(url);
+  notif(`Saved ${results.length} result${results.length===1?'':'s'} to session file ✓`,'ok');
+}
+
+function loadSession(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    let data;
+    try{ data=JSON.parse(e.target.result); }
+    catch(err){ notif('That file is not valid JSON','err'); return; }
+    if(!data||data.app!=='MetaGen'||!Array.isArray(data.results)){
+      notif('Not a MetaGen session file','err'); return;
+    }
+    if(results.length && !confirm(`Replace the ${results.length} result(s) currently shown with ${data.results.length} from this session?`)) return;
+    results=data.results.map(m=>{
+      const meta=normalizeMetadata({
+        title:m.title, description:m.description, keywords:m.keywords, category:m.category
+      });
+      return {
+        file:{name:m.fileName||'(restored)'},
+        id:crypto.randomUUID(),
+        status:'ok',
+        preview:null,
+        restored:true,
+        _cost:m._cost??null,
+        _inputTokens:m._inputTokens??null,
+        _outputTokens:m._outputTokens??null,
+        ...meta
+      };
+    });
+    files=[];
+    renderChips();
+    recalcSessionTotals();
+    refreshResultsState({rebuild:true});
+    notif(`Loaded ${results.length} result${results.length===1?'':'s'} from session ✓`,'ok');
+  };
+  reader.readAsText(file);
 }
 
 /* ============================
