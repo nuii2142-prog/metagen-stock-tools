@@ -14,6 +14,8 @@ CSV next to your images and run the Dreamstime tool, which embeds the metadata i
 of those images. MetaGen handles the *thinking* (writing metadata); the Dreamstime tool
 handles the *embedding* (baking it into files).
 
+🌐 **Try MetaGen online (no install):** **<https://metagen-stock-tools-tioj.vercel.app/>** — runs entirely in your browser; you bring your own AI API key (nothing is sent to any middle server). The Dreamstime tool is Windows-only and runs locally.
+
 🇹🇭 **ภาษาไทย:** อ่าน [README.th.md](./README.th.md) สำหรับคู่มือฉบับเต็มภาษาไทย
 
 ---
