@@ -1410,15 +1410,22 @@ function renderExpFmt(){
   const sel=document.getElementById('expFmt');
   const cur=sel.value;
   sel.innerHTML='';
-  // Active platforms first, then General always available
-  const list=[...activePlats,'General'].filter((v,i,a)=>a.indexOf(v)===i);
-  list.forEach(id=>{
-    if(PLAT_SPECS[id]){
+  const active=[...activePlats,'General'].filter((v,i,a)=>a.indexOf(v)===i&&PLAT_SPECS[v]);
+  const verified=active.filter(id=>!isUntested(id));
+  const untested=active.filter(id=>isUntested(id));
+  const addGroup=(label,ids)=>{
+    if(!ids.length)return;
+    const og=document.createElement('optgroup');
+    og.label=label;
+    ids.forEach(id=>{
       const o=document.createElement('option');
       o.value=id; o.textContent=PLAT_SPECS[id].name;
-      sel.appendChild(o);
-    }
-  });
+      og.appendChild(o);
+    });
+    sel.appendChild(og);
+  };
+  addGroup('✓ Tested & verified', verified);
+  addGroup('🧪 Not yet tested', untested);
   if([...sel.options].some(o=>o.value===cur)) sel.value=cur;
   renderPlatInfo();
 }
@@ -1432,8 +1439,12 @@ function renderPlatInfo(){
   const titleInfo=`≤${sp.titleMax} chars${sp.titleRec?` (rec ≤${sp.titleRec})`:''}`; 
   const delimiter=sp.delimiter||',';
   const headerText=sp.headers.split(delimiter).map(x=>x.trim()).join(', ');
+  const tierNote = isUntested(id)
+    ? `<div class="ib-note warn">🧪 This format has not been tested against a real upload yet — verify the CSV before submitting.</div>`
+    : '';
   document.getElementById('platInfo').innerHTML=`
-    <div class="ib-title">${sp.name}</div>
+    <div class="ib-title">${sp.name}${isUntested(id)?' <span style="font-size:9px;color:var(--wa);">(untested)</span>':''}</div>
+    ${tierNote}
     <div class="ib-row"><span>Title</span><span>${titleInfo}</span></div>
     <div class="ib-row"><span>Description</span><span>${descInfo}</span></div>
     <div class="ib-row"><span>Keywords</span><span>${kwRange}</span></div>
