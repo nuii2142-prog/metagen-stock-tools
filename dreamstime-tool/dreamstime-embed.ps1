@@ -36,7 +36,9 @@ param(
 
   [switch]$Recurse,
 
-  [switch]$DryRun
+  [switch]$DryRun,
+
+  [string]$ProgressFile = ''
 )
 
 Set-StrictMode -Version Latest
@@ -305,6 +307,10 @@ $skipped = 0
 
 foreach($row in $rows) {
   $filename = Get-FirstValue $row @('Filename','File name','file_name','filename','File Name')
+  $rowIndex = $report.Count + 1
+  if(-not [string]::IsNullOrWhiteSpace($ProgressFile)){
+    try { Set-Content -LiteralPath $ProgressFile -Value "$rowIndex|$($rows.Count)|$filename|processing" -Encoding UTF8 } catch {}
+  }
   $title = Limit-Text (Get-FirstValue $row @('Image Name','Title','title','Caption')) 200
   $description = Limit-Text (Ensure-AiDisclosure (Get-FirstValue $row @('Description','description','Caption-Abstract')) $AiDisclosure) 1000
   $keywords = Normalize-Keywords (Get-FirstValue $row @('keywords','Keywords','tags','Tags')) $MaxKeywords ($AiMode -eq 'ai')
@@ -374,6 +380,10 @@ foreach($row in $rows) {
     OutputPath = if($source -and -not ($source.PSObject.Properties.Name -contains 'Ambiguous') -and $status -in @('ok','verify-warning','dry-run')) { Join-Path $outPath $source.Name } else { '' }
     Message = $message
   })
+}
+
+if(-not [string]::IsNullOrWhiteSpace($ProgressFile)){
+  try { Set-Content -LiteralPath $ProgressFile -Value "$($rows.Count)|$($rows.Count)|done|complete" -Encoding UTF8 } catch {}
 }
 
 if(-not $DryRun) {
