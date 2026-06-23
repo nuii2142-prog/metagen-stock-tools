@@ -4,6 +4,22 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### MetaGen
+
+- **GPT-5.4 Mini is now the recommended / default OpenAI model** — faster and cheaper for most
+  metadata jobs. You can still switch to GPT-5.4, GPT-5.5, or GPT-5.4 Nano in the dropdown.
+
+### Project
+
+- **Added a Ko-fi Sponsor button.** A `.github/FUNDING.yml` surfaces a **Sponsor** button on the
+  repo, and both READMEs now include a "Support this project" section
+  ([ko-fi.com/chanuwatsrithong](https://ko-fi.com/chanuwatsrithong)).
+- **Polished repository presentation:** added a repo description and topics, unified the live-demo
+  URL to <https://metagen-stock-tools.vercel.app>, and synced the version badges and in-app
+  `APP_VERSION` to 1.1.0.
+
 ## [1.1.0] - 2026-06-13
 
 ### MetaGen

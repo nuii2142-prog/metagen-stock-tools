@@ -1,8 +1,9 @@
 # MetaGen Stock Tools
 
-![version](https://img.shields.io/badge/version-1.0.0-c8891a)
-![license](https://img.shields.io/badge/license-MIT-blue)
-![platform](https://img.shields.io/badge/platform-Windows-0078d6)
+[![version](https://img.shields.io/badge/version-1.1.0-c8891a)](./CHANGELOG.md)
+[![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+![platform](https://img.shields.io/badge/platform-Windows%20%7C%20Browser-0078d6)
+[![Support on Ko-fi](https://img.shields.io/badge/support-Ko--fi-ff5e5b?logo=kofi&logoColor=white)](https://ko-fi.com/chanuwatsrithong)
 
 Two linked Windows tools for stock-photo contributors.
 
@@ -14,7 +15,7 @@ CSV next to your images and run the Dreamstime tool, which embeds the metadata i
 of those images. MetaGen handles the *thinking* (writing metadata); the Dreamstime tool
 handles the *embedding* (baking it into files).
 
-🌐 **Try MetaGen online (no install):** **<https://metagen-stock-tools-tioj.vercel.app/>** — runs entirely in your browser; you bring your own AI API key (nothing is sent to any middle server). The Dreamstime tool is Windows-only and runs locally.
+🌐 **Try MetaGen online (no install):** **<https://metagen-stock-tools.vercel.app/>** — runs entirely in your browser; you bring your own AI API key (nothing is sent to any middle server). The Dreamstime tool is Windows-only and runs locally.
 
 🇹🇭 **ภาษาไทย:** อ่าน [README.th.md](./README.th.md) สำหรับคู่มือฉบับเต็มภาษาไทย
 
@@ -106,6 +107,18 @@ Not in this release, planned for later:
 - Embed tools for platforms beyond Dreamstime.
 - Real-upload-test the 6 untested platforms and promote them to verified.
 - Modular refactor / build system.
+
+---
+
+## Support this project
+
+MetaGen and the Dreamstime tool are **free and open-source**, built for the stock-contributor
+community. There's no paywall, no account, and nothing to install for the web app. If these
+tools save you time on your metadata workflow, you can support continued development:
+
+[![Support me on Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/chanuwatsrithong)
+
+> ☕ Every coffee helps keep these tools free, maintained, and ad-free. Thank you!
 
 ---
 

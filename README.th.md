@@ -1,8 +1,9 @@
 # MetaGen Stock Tools (คู่มือภาษาไทย)
 
-![version](https://img.shields.io/badge/version-1.0.0-c8891a)
-![license](https://img.shields.io/badge/license-MIT-blue)
-![platform](https://img.shields.io/badge/platform-Windows-0078d6)
+[![version](https://img.shields.io/badge/version-1.1.0-c8891a)](./CHANGELOG.md)
+[![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+![platform](https://img.shields.io/badge/platform-Windows%20%7C%20Browser-0078d6)
+[![Support on Ko-fi](https://img.shields.io/badge/support-Ko--fi-ff5e5b?logo=kofi&logoColor=white)](https://ko-fi.com/chanuwatsrithong)
 
 ชุดเครื่องมือ 2 ตัวสำหรับคนทำ stock photo บน Windows ทำงานต่อเนื่องกัน:
 
@@ -12,7 +13,7 @@
    คัดลอกรูปไปโฟลเดอร์ใหม่, แล้วฝัง metadata (IPTC / XMP / EXIF) ด้วย ExifTool ให้พร้อมอัปโหลด
    **โดยไม่แตะไฟล์ต้นฉบับ**
 
-🌐 **เปิด MetaGen ออนไลน์ (ไม่ต้องติดตั้ง):** **<https://metagen-stock-tools-tioj.vercel.app/>** — ทำงานในเบราว์เซอร์ล้วน ใส่ API key ของคุณเอง (ไม่ส่งผ่านเซิร์ฟเวอร์กลาง) · ส่วน Dreamstime tool ทำงานบน Windows ในเครื่องเท่านั้น
+🌐 **เปิด MetaGen ออนไลน์ (ไม่ต้องติดตั้ง):** **<https://metagen-stock-tools.vercel.app/>** — ทำงานในเบราว์เซอร์ล้วน ใส่ API key ของคุณเอง (ไม่ส่งผ่านเซิร์ฟเวอร์กลาง) · ส่วน Dreamstime tool ทำงานบน Windows ในเครื่องเท่านั้น
 
 > 🇬🇧 ฉบับภาษาอังกฤษ (สั้นกว่า): [README.md](./README.md)
 
@@ -143,6 +144,17 @@ Fable Metagen/
 - เครื่องมือ embed metadata สำหรับแพลตฟอร์มอื่นนอกจาก Dreamstime
 - ทดสอบจริง 6 แพลตฟอร์มที่ยังไม่ทดสอบ แล้วเลื่อนเป็น verified
 - รื้อโครงสร้างเป็นโมดูล / build system
+
+---
+
+## สนับสนุนโปรเจกต์นี้ (Support)
+
+เครื่องมือชุดนี้เป็น **ฟรีและโอเพนซอร์ส** ทำขึ้นเพื่อชุมชนคนทำ stock ไม่มีค่าใช้จ่าย ไม่ต้องสมัครสมาชิก
+ถ้า MetaGen หรือ Dreamstime tool ช่วยประหยัดเวลาในการทำ metadata ของคุณได้ สนับสนุนค่ากาแฟกันได้ที่ Ko-fi 🙏
+
+[![Support me on Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/chanuwatsrithong)
+
+> ☕ ทุกการสนับสนุนช่วยให้เครื่องมือเหล่านี้ฟรีต่อไป ได้รับการดูแล และไม่มีโฆษณา ขอบคุณครับ
 
 ---
 
