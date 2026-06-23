@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### MetaGen
 
 - **Deployed online.** MetaGen is now hosted on Vercel and auto-deploys from `main`
-  (<https://metagen-stock-tools-tioj.vercel.app/>). Renamed `metagen/MetaGen.html` →
+  (<https://metagen-stock-tools.vercel.app/>). Renamed `metagen/MetaGen.html` →
   `metagen/index.html` so the bare site URL serves the app with no extra config; removed the
   interim `vercel.json`. Local use is unchanged — double-click `metagen/index.html`.
 
