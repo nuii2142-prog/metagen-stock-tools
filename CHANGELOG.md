@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### MetaGen
 
+- **Fixed Vecteezy CSV not applying to files whose names contain spaces or commas** (e.g. Adobe
+  Firefly exports like `Firefly_---Piggy bank beside passport, travel fund 207778.jpeg`). Vecteezy
+  rewrites the filename on upload — spaces & commas become `_`, and an underscore right before a
+  hyphen is dropped (`Firefly_---` → `Firefly---`) — then matches CSV rows against that rewritten
+  name. The export now mirrors those rules in the **Filename** column so the rows stop silently
+  failing to match. Verified against 20 real uploaded files.
 - **GPT-5.4 Mini is now the recommended / default OpenAI model** — faster and cheaper for most
   metadata jobs. You can still switch to GPT-5.4, GPT-5.5, or GPT-5.4 Nano in the dropdown.
 

@@ -974,6 +974,20 @@ function cleanVecteezyText(s){
   return String(s||'').replace(/[^\p{L}\p{N} ]+/gu,' ').replace(/\s+/g,' ').trim();
 }
 
+// On upload Vecteezy rewrites the filename, then matches CSV rows by that exact
+// rewritten name. Mirror its rules so AI names (e.g. Firefly's
+// "Firefly_---Piggy bank..., concept, ... 207778.jpeg") match — otherwise those
+// rows silently fail to apply. Verified against 20 real uploaded files:
+//   1) spaces, commas & other punctuation -> "_"  (", " -> "__", " " -> "_")
+//   2) underscores immediately BEFORE a hyphen are dropped ("Firefly_---" ->
+//      "Firefly---") but an underscore AFTER a hyphen is kept ("eye- " ->
+//      "eye-_").
+function cleanVecteezyFilename(name){
+  return String(name||'')
+    .replace(/[^\p{L}\p{N}.\-]/gu,'_')
+    .replace(/_+(-)/g,'$1');
+}
+
 function cleanVecteezyKeywords(keywords){
   const seen=new Set();
   return normalizeKeywords(keywords).map(cleanVecteezyText).filter(k=>{
@@ -1138,7 +1152,7 @@ const PLATFORM_BUILDERS = {
     pond5Price(cfg),
     pond5Editorial(cfg)
   ]),
-  Vecteezy: (r,cfg)=>row([r.file.name, lc(cleanVecteezyText(r.title),100), lc(r.description,500), lk(cleanVecteezyKeywords(r.keywords),50).join(','), cfg.vecteezyLicense||'pro'])
+  Vecteezy: (r,cfg)=>row([cleanVecteezyFilename(r.file.name), lc(cleanVecteezyText(r.title),100), lc(r.description,500), lk(cleanVecteezyKeywords(r.keywords),50).join(','), cfg.vecteezyLicense||'pro'])
 };
 
 const PLATFORM_EXPORTERS = {
