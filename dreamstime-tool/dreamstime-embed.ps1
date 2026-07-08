@@ -228,6 +228,9 @@ function Find-ImageForCsvRow($Index, [string]$Filename) {
   return $null
 }
 
+# ponytail: PS 5.1 passes argv to exiftool in the system ANSI codepage, so declare that as the filename charset
+$script:FileNameCharset = "filename=cp$([System.Text.Encoding]::Default.CodePage)"
+
 function Invoke-ExifToolWrite([string]$ExifTool, [string]$File, [string]$Title, [string]$Description, [string[]]$Keywords) {
   $keywordString = ($Keywords -join ', ')
   $objectName = Limit-Text $Title 64
@@ -236,6 +239,7 @@ function Invoke-ExifToolWrite([string]$ExifTool, [string]$File, [string]$Title, 
   $exifArgs = @(
     '-overwrite_original',
     '-charset', 'IPTC=UTF8',
+    '-charset', $script:FileNameCharset,
     '-sep', ', ',
     '-IPTC:CodedCharacterSet=UTF8',
     "-IPTC:ObjectName=$objectName",
@@ -255,7 +259,10 @@ function Invoke-ExifToolWrite([string]$ExifTool, [string]$File, [string]$Title, 
   }
 
   $exifArgs += $File
-  $output = & $ExifTool @exifArgs 2>&1
+  # ponytail: exiftool warnings on stderr must not become terminating errors and abort the batch
+  $prevEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try { $output = & $ExifTool @exifArgs 2>&1 } finally { $ErrorActionPreference = $prevEap }
   $code = $LASTEXITCODE
   return [pscustomobject]@{ ExitCode = $code; Output = ($output -join "`n") }
 }
@@ -264,6 +271,7 @@ function Invoke-ExifToolVerify([string]$ExifTool, [string]$File) {
   $exifArgs = @(
     '-j',
     '-charset', 'IPTC=UTF8',
+    '-charset', $script:FileNameCharset,
     '-IPTC:Headline',
     '-XMP-dc:Title',
     '-IPTC:Caption-Abstract',
