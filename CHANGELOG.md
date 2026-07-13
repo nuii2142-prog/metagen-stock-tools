@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### MetaGen
 
+- **Added `metagen/Clean Adobe filenames.bat`** to fix Adobe Stock's bulk-CSV metadata matcher
+  silently skipping filenames that contain `[ ]` (common in Adobe Firefly exports like
+  `Firefly_---[Wildlife portrait] ... .jpeg`). Unlike the Vecteezy case below, Adobe keeps the
+  uploaded filename exactly as-is, so a CSV-only fix can't help — the tool renames the image
+  files (stripping the `[...]` segment) and patches the CSV's Filename column with the same
+  transform so they stay matched. Drag a folder onto the `.bat`; it previews before touching
+  anything and backs up the CSV to `.bak`. Verified live against contributor.stock.adobe.com.
 - **Fixed Vecteezy CSV not applying to files whose names contain spaces or commas** (e.g. Adobe
   Firefly exports like `Firefly_---Piggy bank beside passport, travel fund 207778.jpeg`). Vecteezy
   rewrites the filename on upload — spaces & commas become `_`, and an underscore right before a

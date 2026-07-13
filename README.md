@@ -47,6 +47,13 @@ character limits per platform, plus how to promote a platform from untested to v
 
 Full guide: [`docs/metagen-guide.th.md`](./docs/metagen-guide.th.md) (Thai).
 
+**Adobe CSV rows not applying to files with `[brackets]`?** Adobe Stock's bulk-CSV matcher
+silently skips filenames containing `[ ]` (common in Adobe Firefly exports like
+`Firefly_---[Wildlife portrait] ... .jpeg`) — Adobe keeps the uploaded filename as-is, so this
+can't be fixed in the CSV alone. Drag the image folder onto
+**`metagen/Clean Adobe filenames.bat`**: it previews the rename, then on confirm strips the
+`[...]` segment from both the image files and the CSV's Filename column so they stay matched.
+
 ### Dreamstime Metadata Tool
 
 1. In MetaGen, export the **Dreamstime** CSV and place it in the same folder as your JPG images.
@@ -75,7 +82,9 @@ Fable Metagen/
 ├── LICENSE                            ← MIT
 ├── .gitignore
 ├── metagen/
-│   └── index.html                   ← the single-file browser app
+│   ├── index.html                   ← the single-file browser app
+│   ├── Clean Adobe filenames.bat    ← drag-and-drop fix for Adobe's [bracket] CSV bug
+│   └── clean_adobe_filenames.py     ← the rename/patch engine behind the .bat
 ├── dreamstime-tool/
 │   ├── Dreamstime Metadata Tool.hta   ← GUI launcher
 │   ├── dreamstime-embed.ps1           ← the embedding engine
